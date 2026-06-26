@@ -1,0 +1,53 @@
+name: Build and Package
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Download ffmpeg for Windows
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile "ffmpeg.zip"
+          Expand-Archive -Path "ffmpeg.zip" -DestinationPath "ffmpeg_temp" -Force
+          $exe = Get-ChildItem -Path "ffmpeg_temp" -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1
+          Copy-Item $exe.FullName -Destination "bin/ffmpeg.exe" -Force
+      - name: Build with PyInstaller
+        run: pyinstaller --noconsole --onefile --windowed --name "Conversor_Multimedia_Pro" --icon="app.ico" --add-binary "bin\ffmpeg.exe;." main.py
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Conversor_Multimedia_Pro-Windows
+          path: dist/Conversor_Multimedia_Pro.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Download ffmpeg for macOS
+        run: |
+          curl -L -o ffmpeg.zip "https://evermeet.cx/ffmpeg/get/zip"
+          unzip -o ffmpeg.zip -d bin/
+          chmod +x bin/ffmpeg
+      - name: Build with PyInstaller
+        run: pyinstaller --noconfirm --windowed --name "Oli Converter" --add-binary "bin/ffmpeg:." main.py
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oli-Converter-macOS
+          path: dist/Oli Converter.app
