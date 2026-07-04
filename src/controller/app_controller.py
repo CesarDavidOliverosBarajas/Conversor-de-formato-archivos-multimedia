@@ -30,7 +30,7 @@ class AppController:
     def _run_conversion(self, input_path, output_path, quality, progress_callback, completion_callback):
         ext = os.path.splitext(input_path)[1].lower()
         img_exts = ['.jpg', '.jpeg', '.png', '.webp', '.avif']
-        vid_aud_exts = ['.mp3', '.wav', '.flac', '.aac', '.mp4', '.mkv', '.avi', '.mov', '.mts']
+        vid_aud_exts = ['.mp3', '.wav', '.flac', '.aac', '.mp4', '.mkv', '.avi', '.mov', '.mts', '.mpeg', '.mpg']
         
         try:
             if ext in img_exts:

@@ -144,7 +144,7 @@ class MainWindow(TkDnD_CTk):
         ext = os.path.splitext(file_path)[1].lower()
         img_exts = ['.jpg', '.jpeg', '.png', '.webp', '.avif']
         audio_exts = ['.mp3', '.wav', '.flac', '.aac']
-        video_exts = ['.mp4', '.mkv', '.avi', '.mov', '.mts']
+        video_exts = ['.mp4', '.mkv', '.avi', '.mov', '.mts', '.mpeg', '.mpg']
         
         if ext in img_exts:
             vals = ['jpg', 'png', 'webp', 'avif']

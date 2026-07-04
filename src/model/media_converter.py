@@ -39,7 +39,7 @@ class MediaConverter(BaseConverter):
         """Construye el comando ffmpeg con codecs explícitos para compatibilidad Windows."""
         target_ext = os.path.splitext(self.output_path)[1].lower().replace('.', '')
         is_audio = target_ext in ['mp3', 'wav', 'flac', 'aac']
-        video_exts = ['mp4', 'mkv', 'avi', 'mov', 'mts']
+        video_exts = ['mp4', 'mkv', 'avi', 'mov', 'mts', 'mpeg', 'mpg']
 
         cmd = [get_ffmpeg_path(), '-y', '-i', self.input_path]
 
