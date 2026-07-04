@@ -2,7 +2,9 @@
 ; Nombre de la aplicación
 AppName=Conversor Multimedia Pro
 AppVersion=1.0
-AppPublisher=Tu Empresa/Nombre
+AppPublisher=Cesar David Oliveros Barajas
+AppPublisherURL=https://github.com/CesarDavidOliverosBarajas/Conversor-de-formato-archivos-multimedia
+AppSupportURL=https://github.com/CesarDavidOliverosBarajas/Conversor-de-formato-archivos-multimedia/issues
 ; El nombre del instalador ejecutable final
 OutputBaseFilename=Instalador_Conversor_Multimedia_Pro
 ; Carpeta de salida donde Inno Setup dejará el instalador
