@@ -1,5 +1,8 @@
 name: Build and Package
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ main ]
@@ -39,14 +42,6 @@ jobs:
         with:
           name: Instalador_Windows
           path: dist/Instalador_Conversor_Multimedia_Pro.exe
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/Instalador_Conversor_Multimedia_Pro.exe
-            dist/Conversor_Multimedia_Pro.exe
-          generate_release_notes: true
 
   build-macos:
     runs-on: macos-latest
@@ -69,10 +64,26 @@ jobs:
         with:
           name: Oli-Converter-macOS
           path: dist/Oli Converter.app
+
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Instalador_Windows
+          path: release/
+      - uses: actions/download-artifact@v4
+        with:
+          name: Conversor_Multimedia_Pro-Windows
+          path: release/
+      - uses: actions/download-artifact@v4
+        with:
+          name: Oli-Converter-macOS
+          path: release/
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist/Oli Converter.app
+          files: release/*
           generate_release_notes: true
