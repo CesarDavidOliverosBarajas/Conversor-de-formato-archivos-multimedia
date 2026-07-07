@@ -1,21 +1,32 @@
+import io
 import json
 import os
 import sys
 import wave
+import zipfile
 import subprocess
 import tempfile
 from typing import Optional, Callable
 
 from .media_converter import get_ffmpeg_path
 
+VOSK_MODEL_URL = "https://alphacephei.com/vosk/models/vosk-model-small-es-0.42.zip"
+VOSK_MODEL_DIR = "vosk-model-small-es-0.42"
+
+
+def get_bin_dir():
+    return os.path.normpath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'bin')
+    )
+
 
 def get_vosk_model_path():
     if hasattr(sys, '_MEIPASS'):
-        bundled = os.path.join(sys._MEIPASS, 'vosk-model')
+        bundled = os.path.join(sys._MEIPASS, VOSK_MODEL_DIR)
         if os.path.isdir(bundled):
             return bundled
 
-    local_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'bin')
+    local_dir = get_bin_dir()
     if os.path.isdir(local_dir):
         for entry in sorted(os.listdir(local_dir)):
             full = os.path.join(local_dir, entry)
@@ -28,6 +39,38 @@ def get_vosk_model_path():
 class Transcriber:
     def __init__(self, input_path: str):
         self.input_path = input_path
+        self.model_path = get_vosk_model_path()
+
+    def _download_model(self, progress_callback: Optional[Callable[[int], None]] = None):
+        import requests
+
+        bin_dir = get_bin_dir()
+        os.makedirs(bin_dir, exist_ok=True)
+
+        zip_path = os.path.join(bin_dir, VOSK_MODEL_DIR + ".zip")
+
+        resp = requests.get(VOSK_MODEL_URL, stream=True)
+        resp.raise_for_status()
+
+        total = int(resp.headers.get('content-length', 0))
+        downloaded = 0
+
+        with open(zip_path, 'wb') as f:
+            for chunk in resp.iter_content(chunk_size=8192):
+                f.write(chunk)
+                downloaded += len(chunk)
+                if progress_callback and total > 0:
+                    prog = int((downloaded / total) * 50)
+                    progress_callback(min(prog, 50))
+
+        if progress_callback:
+            progress_callback(50)
+
+        with zipfile.ZipFile(zip_path, 'r') as zf:
+            zf.extractall(bin_dir)
+
+        os.unlink(zip_path)
+
         self.model_path = get_vosk_model_path()
 
     def _ensure_wav(self) -> str:
@@ -73,11 +116,7 @@ class Transcriber:
 
     def transcribe(self, progress_callback: Optional[Callable[[int], None]] = None) -> str:
         if self.model_path is None:
-            raise FileNotFoundError(
-                "Modelo Vosk no encontrado en bin/. Descarga "
-                "https://alphacephei.com/vosk/models/vosk-model-small-es-0.42.zip "
-                "y extrae la carpeta en bin/ (ej: bin/vosk-model-small-es-0.42/)"
-            )
+            self._download_model(progress_callback)
 
         from vosk import Model, KaldiRecognizer
 
