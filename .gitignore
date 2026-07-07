@@ -23,3 +23,8 @@ Thumbs.db
 
 # Project specific
 *.log
+
+# Binaries downloaded manually (FFmpeg, Vosk model)
+bin/ffmpeg*
+bin/vosk-model*
+!bin/.gitkeep

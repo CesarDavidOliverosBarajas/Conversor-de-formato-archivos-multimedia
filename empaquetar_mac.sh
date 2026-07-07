@@ -4,8 +4,11 @@ echo "    COMPILADOR MAC OS (.app) - CON FFMPEG INCLUIDO EN RAM"
 echo "=========================================================="
 echo ""
 
-# Se asume que descargaste ffmpeg y lo colocaste en la carpeta bin/ del proyecto
+VERSION=$(cat VERSION 2>/dev/null || echo "1.0.0")
+APP_NAME="Oli Converter v${VERSION}"
+
 FFMPEG_PATH="bin/ffmpeg"
+VOSK_MODEL=$(ls -d bin/vosk-model-* 2>/dev/null | head -1)
 
 if [ ! -f "$FFMPEG_PATH" ]; then
     echo "¡ERROR! No se encontro $FFMPEG_PATH."
@@ -13,15 +16,21 @@ if [ ! -f "$FFMPEG_PATH" ]; then
     exit 1
 fi
 
+echo "» Version: ${VERSION}"
 echo "» FFmpeg local detectado en: $FFMPEG_PATH"
+if [ -n "$VOSK_MODEL" ]; then
+    echo "» Modelo Vosk detectado en: $VOSK_MODEL"
+fi
 echo "» Construyendo el archivo .app..."
 
-# Ejecutamos Pyinstaller.
-# --add-binary "$FFMPEG_PATH:." le ordena que chupe ffmpeg, lo meta a tu app,
-# y no le pida jamás al cliente final que lo instale por su cuenta.
-pyinstaller --noconfirm --windowed --name "Oli Converter" --add-binary "$FFMPEG_PATH:." main.py
+ADD_DATA="--add-data ${FFMPEG_PATH}:."
+if [ -n "$VOSK_MODEL" ]; then
+    VOSK_DIRNAME=$(basename "$VOSK_MODEL")
+    ADD_DATA="${ADD_DATA} --add-data ${VOSK_MODEL}:${VOSK_DIRNAME}"
+fi
+
+pyinstaller --noconfirm --windowed --name "${APP_NAME}" ${ADD_DATA} main.py
 
 echo ""
 echo "=== ¡LISTO! ==="
-echo "Encuentra tu aplicacion portable final (Oli Converter.app) dentro de la carpeta 'dist'."
-echo "Puedes enviar esa app a cualquier otra Mac."
+echo "Encuentra tu app en: dist/${APP_NAME}.app"

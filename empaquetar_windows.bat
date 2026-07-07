@@ -27,12 +27,21 @@ echo (con Python pre-instalado y corriendo 'pip install -r requirements.txt').
 echo.
 pause
 
+set /p VERSION=<VERSION
+if "%VERSION%"=="" set VERSION=1.0.0
+
+set APP_NAME=Conversor_Multimedia_Pro_v%VERSION%
+
+set ADD_BIN=--add-binary "bin\ffmpeg.exe;."
+for /d %%i in (bin\vosk-model-*) do if exist "%%i" set ADD_BIN=%ADD_BIN% --add-binary "%%i;%%~nxi"
+
+echo Version: %VERSION%
 echo Empaquetando la aplicacion en un solo archivo ejecutable...
 echo.
-pyinstaller --noconsole --onefile --windowed --name "Conversor_Multimedia_Pro" --icon="app.ico" --add-binary "bin\ffmpeg.exe;." main.py
+pyinstaller --noconsole --onefile --windowed --name "%APP_NAME%" --icon="app.ico" %ADD_BIN% main.py
 
 echo.
-echo ¡Proceso Finalizado! Tu ejecutable esta en la carpeta "dist".
+echo ¡Proceso Finalizado! Tu ejecutable esta en: dist\%APP_NAME%.exe
 echo.
 echo NOTA: En Windows 10, si el .exe compilado falla al iniciar, instala:
 echo   - Microsoft Visual C++ Redistributable 2015-2022 (x64)

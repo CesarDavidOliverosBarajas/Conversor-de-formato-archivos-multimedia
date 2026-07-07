@@ -4,6 +4,7 @@ from typing import Callable, Optional
 
 from src.model.image_converter import ImageConverter
 from src.model.media_converter import MediaConverter
+from src.model.transcriber import Transcriber
 
 class AppController:
     """
@@ -30,7 +31,7 @@ class AppController:
     def _run_conversion(self, input_path, output_path, quality, progress_callback, completion_callback):
         ext = os.path.splitext(input_path)[1].lower()
         img_exts = ['.jpg', '.jpeg', '.png', '.webp', '.avif']
-        vid_aud_exts = ['.mp3', '.wav', '.flac', '.aac', '.mp4', '.mkv', '.avi', '.mov', '.mts', '.mpeg', '.mpg']
+        vid_aud_exts = ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.mp4', '.mkv', '.avi', '.mov', '.mts', '.mpeg', '.mpg']
         
         try:
             if ext in img_exts:
@@ -48,4 +49,22 @@ class AppController:
             
         except Exception as e:
             # Captura de errores (ej: archivo malogrado, FFmpeg no instalado globalmente, etc)
+            completion_callback(False, str(e))
+
+    def start_transcription(self, input_path: str,
+                            progress_callback: Callable[[int], None],
+                            completion_callback: Callable[[bool, str], None]):
+        thread = threading.Thread(
+            target=self._run_transcription,
+            args=(input_path, progress_callback, completion_callback),
+            daemon=True
+        )
+        thread.start()
+
+    def _run_transcription(self, input_path, progress_callback, completion_callback):
+        try:
+            transcriber = Transcriber(input_path)
+            text = transcriber.transcribe(progress_callback)
+            completion_callback(True, text)
+        except Exception as e:
             completion_callback(False, str(e))

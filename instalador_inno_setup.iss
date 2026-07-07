@@ -1,7 +1,7 @@
 [Setup]
 ; Nombre de la aplicación
 AppName=Conversor Multimedia Pro
-AppVersion=1.0
+AppVersion=1.1.0
 AppPublisher=Cesar David Oliveros Barajas
 AppPublisherURL=https://github.com/CesarDavidOliverosBarajas/Conversor-de-formato-archivos-multimedia
 AppSupportURL=https://github.com/CesarDavidOliverosBarajas/Conversor-de-formato-archivos-multimedia/issues

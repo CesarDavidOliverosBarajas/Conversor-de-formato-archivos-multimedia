@@ -38,12 +38,17 @@ class MediaConverter(BaseConverter):
     def _get_ffmpeg_command(self):
         """Construye el comando ffmpeg con codecs explícitos para compatibilidad Windows."""
         target_ext = os.path.splitext(self.output_path)[1].lower().replace('.', '')
-        is_audio = target_ext in ['mp3', 'wav', 'flac', 'aac']
+        is_audio = target_ext in ['mp3', 'wav', 'flac', 'aac', 'ogg']
         video_exts = ['mp4', 'mkv', 'avi', 'mov', 'mts', 'mpeg', 'mpg']
 
         cmd = [get_ffmpeg_path(), '-y', '-i', self.input_path]
 
+        input_video_exts = ['.mp4', '.mkv', '.avi', '.mov', '.mts', '.mpeg', '.mpg']
+        input_is_video = os.path.splitext(self.input_path)[1].lower() in input_video_exts
+
         if is_audio:
+            if input_is_video:
+                cmd.append('-vn')
             audio_quality = {
                 "Sin pérdida": "320k",
                 "Alta": "256k",
@@ -54,6 +59,8 @@ class MediaConverter(BaseConverter):
                 cmd.extend(['-c:a', 'libmp3lame'])
             elif target_ext == 'aac':
                 cmd.extend(['-c:a', 'aac'])
+            elif target_ext == 'ogg':
+                cmd.extend(['-c:a', 'libvorbis'])
             if target_ext not in ['wav', 'flac']:
                 cmd.extend(['-b:a', audio_quality.get(self.quality, "192k")])
         elif target_ext in video_exts:
